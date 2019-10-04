@@ -6,7 +6,6 @@
         xmlns:local="clr-namespace:Chronos.UI"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
-
+    <Grid x:Name="MainGrid">
     </Grid>
 </Window>
