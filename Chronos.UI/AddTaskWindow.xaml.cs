@@ -1,4 +1,5 @@
 ﻿using Chronos.UI.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -41,8 +42,9 @@ namespace Chronos.UI
                 //They've provided the same name as a name in our TaskList
             }
             else
-            {
+            {                
                 task.Name = activityName;
+                task.Guid = Guid.NewGuid().ToString("N");
                 _tasks.Add(task);
                 DialogResult = true;
                 Close();

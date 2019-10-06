@@ -5,7 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Chronos.UI"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800" AllowsTransparency="True" WindowStyle="None" MouseDown="Window_MouseDown">
+    <Window.Background>
+        <SolidColorBrush Opacity=".75" Color="#FF1B1B1B"></SolidColorBrush>
+    </Window.Background>
     <Grid x:Name="MainGrid">
+        <Label Content="Chronos" HorizontalAlignment="Left" Margin="-2,-8,0,0" VerticalAlignment="Top" Foreground="White" FontFamily="Agency FB" FontSize="36" FontWeight="Bold"/>
+        <StackPanel x:Name="sp_main" Margin="10,40,95,10" CanVerticallyScroll="True" ScrollViewer.VerticalScrollBarVisibility="Auto" />
+        <Button Content="Add Task" HorizontalAlignment="Center" Margin="0,8,0,0" VerticalAlignment="Top" Click="Button_Click" Width="78"/>
     </Grid>
 </Window>

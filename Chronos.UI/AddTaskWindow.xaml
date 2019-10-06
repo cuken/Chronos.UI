@@ -5,11 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Chronos.UI"
         mc:Ignorable="d"
-        Title="AddTaskWindow" Height="450" Width="800">
+        Title="AddTaskWindow" Height="450" Width="800" >
     <Grid>
         <Label Content="Please enter a task name" Margin="0,0,532,385.04"/>
         <TextBox x:Name="tb_textName" HorizontalAlignment="Left" Height="23" Margin="10,26,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="659" KeyDown="Tb_textName_KeyDown"/>
-        <Button x:Name="btn_Add" Content="Button" HorizontalAlignment="Left" Margin="674,28,0,0" VerticalAlignment="Top" Click="Btn_Add_Click"/>
-
+        <Button x:Name="btn_Add" Content="Button" HorizontalAlignment="Left" Margin="674,28,0,0" VerticalAlignment="Top" Click="Btn_Add_Click"/>        
     </Grid>
 </Window>

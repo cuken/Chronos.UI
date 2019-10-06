@@ -26,16 +26,15 @@ namespace Chronos.UI
         // #TODO: Load the previous time sheet and instaniate this stuff;
 
         private List<WorkTask> _tasks = new List<WorkTask>();
-        private StackPanel _sp = new StackPanel();
         private Button _addTaskButton = new Button();
         private WorkTask activeTask = null;
         private DispatcherTimer _clockTimer;
         private BackgroundWorker backgroundWorker;
+        private BrushConverter _bc = new BrushConverter();
 
         public MainWindow()
         {
             InitializeComponent();
-            BuildInitialForm();
             SetupClock();
         }
 
@@ -51,66 +50,56 @@ namespace Chronos.UI
             if (activeTask != null)
             {
                 WorkTask workTask = _tasks.Where(x => x.Name == activeTask.Name).FirstOrDefault();
-                Label lb = (Label)LogicalTreeHelper.FindLogicalNode(_sp, $"lb_{ workTask.Name}");                
+                Label lb = (Label)LogicalTreeHelper.FindLogicalNode(sp_main, $"lb_{ workTask.Guid}");                
                 TimeSpan diff = DateTime.Now - workTask.Activites[workTask.Activites.Count - 1].StartTime;
                 lb.Content = diff.ToString(@"hh\:mm\:ss");
             }
         }
 
-        private void BuildInitialForm()
-        {
-            SetupAddTaskButton();
-            MainGrid.Children.Add(_addTaskButton);
-            MainGrid.Children.Add(_sp);
-        }
-
-        #region UISetup
-        private void SetupAddTaskButton()
-        {
-            _addTaskButton.HorizontalAlignment = HorizontalAlignment.Right;
-            _addTaskButton.Content = "AddTask";
-            _addTaskButton.Click += _addTaskButton_Click;
-        }
-
-        private void SetupReportButton()
-        {
-            //addReportButton.HorizontalAlignment = HorizontalAlignment.Right;
-            //addReportButton.VerticalAlignment = VerticalAlignment.Bottom;
-            //addReportButton.Content = "AddTask";
-            //addReportButton.Click += _addReportButton_Click;
-        }
-
-
-        #endregion
-
         #region UIActions
-
-        private void _addTaskButton_Click(object sender, RoutedEventArgs e)
-        {
-            AddTaskWindow newTask = new AddTaskWindow(_tasks);
-            bool? dr = newTask.ShowDialog();
-
-            if (dr ?? false) // <- This shits' crazy. (dr!=null && dr)
-                _tasks = newTask._tasks;
-            AddTaskToStackPanel(newTask.task);
-        }
 
         private void AddTaskToStackPanel(WorkTask task)
         {
+            var background = new SolidColorBrush(Color.FromArgb(100, 200, 200, 200));
+            background.Opacity = 0.90;            
+
+            WrapPanel panel = new WrapPanel
+            {
+                Width = sp_main.Width - 10,
+                Height = 25,
+                Background = background,
+                Margin = new Thickness(5)
+            };
+
             Label taskName = new Label
             {
-                Content = task.Name
+                Content = task.Name,
+                Width = 250,
+                Foreground = (Brush)_bc.ConvertFrom("#FFF"),
             };
+
+            LinearGradientBrush verticalGradient = new LinearGradientBrush
+            {
+                StartPoint = new Point(0.5, 0),
+                EndPoint = new Point(0.5, 1)
+            };
+            verticalGradient.GradientStops.Add(new GradientStop(Color.FromRgb(0, 117, 206), 0.0));
+            verticalGradient.GradientStops.Add(new GradientStop(Color.FromRgb(0, 72, 130), 1.0));
 
             Button taskButton = new Button
             {
-                Name = $"btn_{task.Name}",
-                Content = "Start"
+                Name = $"btn_{task.Guid}",
+                Foreground = (Brush)_bc.ConvertFrom("#FFF"),
+                Background = verticalGradient,
+                Width = 75,
+                Height = 20,
+                Content = "Start",
+                Margin = new Thickness(0,1.5,0,0)
             };
 
             Label taskDuration = new Label
             {
-                Name = $"lb_{task.Name}",
+                Name = $"lb_{task.Guid}",
                 Content = task.TotalDuration.ToString(@"hh\:mm\:ss")
             };
 
@@ -124,14 +113,21 @@ namespace Chronos.UI
             StackPanel sp = new StackPanel
             {
                 Orientation = Orientation.Horizontal,
-                Name = $"sp_{task.Name}"
+                Name = $"sp_{task.Guid}"
             };
 
-            sp.Children.Add(taskName);
+            sp.Children.Add(taskName);            
             sp.Children.Add(taskDuration);
             sp.Children.Add(taskButton);
             sp.Children.Add(taskComment);
-            _sp.Children.Add(sp);
+            panel.Children.Add(sp);
+            sp_main.Children.Add(panel);
+
+            //sp.Children.Add(taskName);
+            //sp.Children.Add(taskDuration);
+            //sp.Children.Add(taskButton);
+            //sp.Children.Add(taskComment);
+            //sp_main.Children.Add(sp);
         }
 
         private void HandleTaskButtonStartClick(WorkTask workTask, object sender, RoutedEventArgs e)
@@ -140,16 +136,14 @@ namespace Chronos.UI
             {
                 if(activeTask != null)
                 {
-
                     activeTask.Activites[activeTask.Activites.Count - 1].StopTime = DateTime.Now;
                     activeTask.ComputeTotalDuration(activeTask.Activites.Count - 1);
-                    Button oldbtn = (Button)LogicalTreeHelper.FindLogicalNode(_sp, $"btn_{ workTask.Name}");
-                    //Button btn = (Button)_sp.FindName($"btn_{workTask.Name}");
+                    Button oldbtn = (Button)LogicalTreeHelper.FindLogicalNode(sp_main, $"btn_{ workTask.Guid}");
                     oldbtn.Content = "Start";                    
                 }
 
                 activeTask = workTask;
-                Button newbtn = (Button)LogicalTreeHelper.FindLogicalNode(_sp, $"btn_{ workTask.Name}");
+                Button newbtn = (Button)LogicalTreeHelper.FindLogicalNode(sp_main, $"btn_{ workTask.Guid}");
                 newbtn.Content = "Stop";
                 workTask.Activites.Add(new Activity
                 {
@@ -162,19 +156,26 @@ namespace Chronos.UI
                 activeTask = null;
                 workTask.Activites[workTask.Activites.Count - 1].StopTime = DateTime.Now;
                 workTask.ComputeTotalDuration(workTask.Activites.Count - 1);
-                Button btn = (Button)LogicalTreeHelper.FindLogicalNode(_sp, $"btn_{ workTask.Name}");
+                Button btn = (Button)LogicalTreeHelper.FindLogicalNode(sp_main, $"btn_{ workTask.Guid}");
                 btn.Content = "Start";
             }
         }
 
-        private void HandleTaskButtonStopClick(WorkTask workTask, object sender, RoutedEventArgs e)
+        private void Button_Click(object sender, RoutedEventArgs e)
         {
-            activeTask = null;
-            activeTask.Activites[activeTask.Activites.Count - 1].StopTime = DateTime.Now;
-            Button btn = (Button)LogicalTreeHelper.FindLogicalNode(_sp, $"btn_{ workTask.Name}");
-            btn.Content = "Start";
+            AddTaskWindow newTask = new AddTaskWindow(_tasks);
+            bool? dr = newTask.ShowDialog();
+
+            if (dr ?? false) // <- This shits' crazy. (dr!=null && dr)
+                _tasks = newTask._tasks;
+            AddTaskToStackPanel(newTask.task);
         }
 
+        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+                if (e.ChangedButton == MouseButton.Left)
+                    DragMove();
+        }
     }
     #endregion
 }
